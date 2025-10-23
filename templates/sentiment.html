@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sentiment Detection</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="light-bg">
+    <div class="widget-box">
+        <h1>🎵 MoodMate 🎵</h1>
+        <p class="subtitle">Detect your emotion or sentiment and get personalized music recommendations!</p>
+
+    <h2>✍️ Sentiment Detection</h2>
+
+    <form action="/predict_sentiment/" method="post">
+        <textarea name="text" placeholder="Type your sentence..." required></textarea>
+        <br>
+        <label for="count">Number of songs:</label>
+        <select name="count" id="count">
+            <option value="3">3</option>
+            <option value="5" selected>5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+        </select>
+        <button type="submit">Analyze Sentiment</button>
+    </form>
+
+    {% if sentiment %}
+        <p id="sentimentResult">Predicted Sentiment: <strong>{{ sentiment }}</strong></p>
+        {% endif %}
+
+        {% if songs %}
+        <h3>Recommended Songs:</h3>
+        <div class="song-list">
+            {% for song in songs %}
+            <p>{{ song | safe }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+
+    <a href="/" class="back">⬅ Back to Home</a>
+</body>
+</html>
+
