@@ -1,0 +1,14 @@
+# Python 3.9.13
+fastapi
+uvicorn
+jinja2
+python-multipart
+tensorflow
+keras
+opencv-python<5
+numpy
+transformers
+torch
+pandas
+scikit-learn
+matplotlib
