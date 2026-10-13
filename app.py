@@ -19,15 +19,15 @@ templates = Jinja2Templates(directory="templates")
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request, "index.html")
 
 @app.get("/emotion", response_class=HTMLResponse)
 async def emotion_page(request: Request):
-    return templates.TemplateResponse("emotion.html", {"request": request})
+    return templates.TemplateResponse(request, "emotion.html")
 
 @app.get("/sentiment", response_class=HTMLResponse)
 async def sentiment_page(request: Request):
-    return templates.TemplateResponse("sentiment.html", {"request": request})
+    return templates.TemplateResponse(request, "sentiment.html")
 
 @app.post("/predict_emotion/", response_class=HTMLResponse)
 async def predict_emotion(request: Request, method: str = Form(...), file: UploadFile = File(None), count: int = Form(5)):
@@ -57,12 +57,13 @@ async def predict_emotion(request: Request, method: str = Form(...), file: Uploa
         songs = []
 
     return templates.TemplateResponse(
+        request,
         "emotion.html",
-        {"request": request, "emotion": emotion, "image_url": image_url, "songs": songs}
+        {"emotion": emotion, "image_url": image_url, "songs": songs}
     )
 
 @app.post("/predict_sentiment/", response_class=HTMLResponse)
 async def predict_sentiment(request: Request, text: str = Form(...), count: int = Form(5)):
     sentiment = detect_emotion(text)
     songs = recommend_songs_by_emotion(sentiment,n=count)
-    return templates.TemplateResponse("sentiment.html", {"request": request, "sentiment": sentiment, "songs": songs})
+    return templates.TemplateResponse(request, "sentiment.html", {"sentiment": sentiment, "songs": songs})
