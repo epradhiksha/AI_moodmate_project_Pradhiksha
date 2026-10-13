@@ -1,3 +1,3 @@
 Description: Pre-trained model file for facial emotion detection using VGG16 + Transformer architecture.
 File size: ~250 MB
-Download link: https://drive.google.com/file/d/15ky6x-E55_mVe6jjXXzUvuo1p8RwVSq-/view?usp=sharing
+Download link: https://drive.google.com/file/d/1haDUkJOA5MHOJYZUK5Vgtks8DxYzV8jF/view?usp=sharing
