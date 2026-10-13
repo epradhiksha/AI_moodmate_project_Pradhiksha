@@ -1,105 +1,146 @@
-# 🎵 MoodMate: Emotion Detection and Music Recommendation System  
+# 🎵 MoodMate — Emotion-Based Music Recommendation
 
-An intelligent system that detects a user’s emotional state from **facial expressions** or **text input** and recommends music that aligns with or enhances the user's mood using **AI/ML techniques**.  
-
----
-
-## 📌 Objectives
-- Detect user emotions from **facial images** or **text**.  
-- Integrate **computer vision / NLP** with recommendation systems.  
-- Build a recommendation engine using **music metadata** and **emotion mapping**.  
-- Deliver an interactive prototype with **real-time emotion-based music suggestions**.  
+MoodMate detects how you feel — from your **face** (photo or live webcam) or from a **sentence you type** — and recommends songs that match your mood, with direct Spotify links.
 
 ---
 
-## 🎯 Expected Outcomes
-- Gain experience with **emotion detection** from images and text.  
-- Learn to integrate **AI models** with recommendation systems.  
-- Implement a **music recommendation engine** using metadata and similarity measures.  
-- Create a working **interactive demo**.  
+## ✨ Features
+
+- **Image upload** – upload a photo and the app detects the emotion on the face.
+- **Live webcam** – a camera window opens, draws a box around your face and shows the predicted emotion in real time; the most frequent emotion across the captured frames is used.
+- **Text input** – type a sentence and a BERT model detects its emotion.
+- **Song recommendations** – choose how many songs (3, 5, 10 or 20) and get a list with clickable Spotify links.
 
 ---
 
-## 📂 Datasets
-- **[FER-2013](https://www.kaggle.com/datasets/msambare/fer2013)** – Facial emotion detection (images).  
-- **Million Song Dataset (subset)** or **Last.fm dataset** – Music recommendation (tags, genres, moods).  
-- **[RAVDESS](https://zenodo.org/record/1188976)** – Optional multimodal dataset (speech & song emotions).  
+## 🧠 How It Works
+
+```
+ Photo / Webcam ──► Haar cascade (face) ──► VGG16 + Transformer ──┐
+                                                                  ├──► Emotion ──► Song filter ──► Spotify links
+ Text ───────────► BERT emotion classifier ───────────────────────┘
+```
+
+### Facial emotion detection
+- Faces are located with OpenCV's **Haar cascade** (`haarcascade_frontalface_default.xml`).
+- Each face is resized to **128×128**, converted to RGB and passed through VGG16 preprocessing.
+- A **VGG16 + Transformer** model classifies it into 5 emotions:
+  `angry`, `happy`, `sad`, `surprise`, `neutral`.
+- The model was trained on a combined **FER-2013 + RAF-DB** dataset (28,361 training / 7,088 validation / 8,877 test images) and reaches **80% test accuracy**.
+
+### Text emotion detection
+- Uses the pre-trained Hugging Face model [`bhadresh-savani/bert-base-uncased-emotion`](https://huggingface.co/bhadresh-savani/bert-base-uncased-emotion).
+
+### Music recommendation
+Songs from `Music Info.csv` are filtered by their **valence** (how positive a song sounds) and **energy**:
+
+| Emotion  | Valence      | Energy       |
+|----------|--------------|--------------|
+| happy    | > 0.6        | > 0.5        |
+| sad      | < 0.4        | < 0.5        |
+| angry    | < 0.4        | > 0.7        |
+| surprise | 0.4 – 0.7    | > 0.6        |
+| neutral  | 0.4 – 0.6    | 0.4 – 0.6    |
+
+A random sample of matching songs is returned so you get different suggestions each time.
 
 ---
 
-## 🛠️ Modules to be Implemented
-1. **Data Collection & Preprocessing**  
-2. **Emotion Detection Module** (Image or Text-based)  
-3. **Music Dataset Processing and Feature Extraction**  
-4. **Emotion-to-Music Mapping and Recommendation System**  
-5. **User Interface for Real-Time Interaction**  
-6. **Evaluation and Final Integration**  
+## 🔬 Models Explored
+
+Several facial emotion models were trained and compared (see the [`facial emotion detection/`](facial%20emotion%20detection/) notebooks). The MobileNetV2 + Conv head and VGG16 + Transformer models were trained on **Kaggle Notebooks** using Kaggle's free GPU (the final model on an NVIDIA Tesla T4).
+
+| Model | Notebook | Input | Classes | Dataset |
+|-------|----------|-------|---------|---------|
+| CNN (from scratch) | `cnn.ipynb` | 48×48 grayscale | 7 | FER-2013 |
+| MobileNetV2 (transfer learning) | `Mobilenet.ipynb` | 224×224 RGB | 7 | FER-2013 |
+| MobileNetV2 + Conv head | `mobilenet-5.ipynb` | 128×128 RGB | 5 | FER-2013 |
+| **VGG16 + Transformer** (final) | `vgg16+transformer.ipynb` | 128×128 RGB | 5 | FER-2013 + RAF-DB |
+
+### Why VGG16 + Transformer?
+
+<!-- Fill in the paper details:
+The idea of combining a CNN with a Transformer comes from
+[*Paper Title*](link) by Author et al. (Year).
+-->
+VGG16 (pre-trained on ImageNet) extracts local facial features such as the eyes, mouth and eyebrows. Transformer encoder layers (multi-head self-attention) on top learn how these regions relate to each other, which helps with subtle expressions.
 
 ---
 
-## 📅 Project Timeline (8 Weeks)
+## 📂 Project Structure
 
-### **Milestone 1: Week 1 & 2 — Requirements & Dataset Preparation**
-- Define project scope and tech stack.  
-- Download and explore FER-2013 and music datasets.  
-- Clean and preprocess emotion image/text data.  
-- Extract and organize music features (genre, mood, etc.).  
-
-### **Milestone 2: Week 3 & 4 — Emotion Detection System**
-- Build and train a **CNN model** for facial emotion recognition or **BERT/LSTM** for sentiment analysis from text.  
-- Test and evaluate the model on validation data.  
-- Save emotion classification outputs for recommendation use.  
-
-### **Milestone 3: Week 5 & 6 — Music Recommendation Engine**
-- Map detected emotions to relevant music tags (**happy, calm, sad, etc.**).  
-- Build a **content-based filtering model** using cosine similarity or TF-IDF.  
-- Integrate emotion detection with music recommendation.  
-- Return real-time music suggestions.  
-
-### **Milestone 4: Week 7 & 8 — UI, Testing & Final Presentation**
-- Develop a **front-end** for image upload/text input & playlist suggestion.  
-- Perform real-time testing and validation.  
-- Final documentation and deployment.  
-- Prepare demo video and presentation.  
+```
+├── app.py                     # FastAPI app and routes
+├── detectface.py              # Face detection + facial emotion prediction (image & webcam)
+├── TEXT.py                    # Text emotion detection (BERT)
+├── recommendation.py          # Emotion → song recommendations
+├── Music Info.csv             # Music dataset (audio features + Spotify IDs)
+├── facial emotion detection/  # Training notebooks and saved .keras models
+├── templates/                 # HTML pages (home, emotion, sentiment)
+├── static/                    # CSS and uploaded images
+└── requirements.txt
+```
 
 ---
 
-## 📊 Evaluation Criteria
-- **Milestone 1**  
-  - Dataset acquisition & preprocessing  
-  - Clear emotion-to-music label mapping  
+## ⚙️ Setup
 
-- **Milestone 2**  
-  - Accuracy of emotion classification  
-  - Model generalization to test data  
+**Requirements:** Python 3.9.13 (Anaconda recommended), a webcam for live detection.
 
-- **Milestone 3**  
-  - Precision of music recommendations  
-  - Smooth integration of emotion → music flow  
+```bash
+git clone https://github.com/epradhiksha/AI_moodmate_project_Pradhiksha.git
+cd AI_moodmate_project_Pradhiksha
 
-- **Milestone 4**  
-  - Functional UI with end-to-end demo  
-  - Documentation & presentation quality  
+conda create -n moodmate python=3.9.13 -y
+conda activate moodmate
+pip install -r requirements.txt
+```
+
+## ▶️ Run
+
+```bash
+uvicorn app:app --reload
+```
+
+Open **http://127.0.0.1:8000** in your browser.
+
+- **Image / Webcam** – upload a photo, or click *Use Webcam*. A camera window opens; press **q** to stop early.
+- **Text Input** – type how you feel and submit.
+
+> The first request is slower while the models load.
 
 ---
 
-## 🚀 Tech Stack
-- **Python, TensorFlow/Keras, PyTorch** – Deep Learning  
-- **OpenCV** – Image preprocessing  
-- **NLTK / Hugging Face Transformers** – Text-based emotion detection  
-- **Flask / Streamlit / React** – UI development  
-- **Pandas, NumPy, Scikit-learn** – Data processing  
+## 🛠️ Tech Stack
+
+- **FastAPI**, **Jinja2**, **Uvicorn** – web app
+- **TensorFlow / Keras** – facial emotion model
+- **OpenCV** – face detection and webcam
+- **Hugging Face Transformers**, **PyTorch** – text emotion model
+- **Pandas**, **NumPy** – music data processing
 
 ---
 
-## 📌 Deliverables
-- End-to-end **real-time emotion detection + music recommendation system**.  
-- **Interactive UI** for users to input text or upload an image.  
-- **Demo video and final report** with evaluation metrics.  
+## 🚧 Limitations & Future Work
 
-##  Submission Details
-1. Fork this repository to your own GitHub account, naming it AI-Moodmate-[YourName] (replace [YourName] with your actual name)
-2. (Optional) Clone your forked repository to your local machine
-3. Push your changes to your forked repository or upload your work manually along with commits
-4. Make regular, meaningful commits for every update and and at the end of milestones
-5. Make sure to update the repo for every milestone 
+- The face model recognises 5 emotions; fear and disgust are not included.
+- The webcam window opens on the machine running the server, so it works locally only. A future version could capture video in the browser instead.
+- Recommendations use simple valence/energy rules; content-based similarity (e.g. on genre and tags) could make them more personal.
+- Possible additions: in-app Spotify playback, mood history, and combining face + text for a single prediction.
+
+---
+
+## 🙏 Acknowledgements
+
+
+- **[FER-2013](https://www.kaggle.com/datasets/msambare/fer2013)** – facial expression dataset
+- **RAF-DB** – Real-world Affective Faces Database (S. Li, W. Deng, J. Du, CVPR 2017)
+- **Combined FER + RAF-DB dataset** on Kaggle 
+- **Music dataset** – `Music Info.csv` (song metadata, Spotify audio features and IDs) 
+- **[bhadresh-savani/bert-base-uncased-emotion](https://huggingface.co/bhadresh-savani/bert-base-uncased-emotion)** – pre-trained text emotion model
+- **[Kaggle](https://www.kaggle.com/)** – free GPU used to train the facial emotion models
+- **ImageNet pre-trained weights** for VGG16 and MobileNetV2 via Keras Applications
+
+## 📄 License
+
+This project is licensed under the MIT License — see [LICENSE](LICENSE).
