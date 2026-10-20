@@ -2,6 +2,8 @@
 
 MoodMate detects how you feel — from your **face** (photo or live webcam) or from a **sentence you type** — and recommends songs that match your mood, with direct Spotify links.
 
+🚀 **Live demo:** [huggingface.co/spaces/Prad1/moodmate](https://huggingface.co/spaces/Prad1/moodmate)
+
 ---
 
 ## ✨ Features
