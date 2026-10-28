@@ -35,7 +35,7 @@ async def predict_emotion(request: Request, method: str = Form(...), file: Uploa
     emotion = None
     songs = None
 
-    if method == "upload" and file:
+    if method == "upload" and file and file.filename:
         # Save uploaded image to static/uploads
         file_path = f"static/uploads/{file.filename}"
         with open(file_path, "wb") as buffer:
@@ -51,7 +51,7 @@ async def predict_emotion(request: Request, method: str = Form(...), file: Uploa
         emotion = "No input detected"
 
     # Get song recommendations based on emotion
-    if emotion and emotion != "No input detected":
+    if emotion and emotion not in ("No input detected", "Webcam not available"):
         songs = recommend_songs_by_emotion(emotion,n=count)
     else:
         songs = []
@@ -59,11 +59,11 @@ async def predict_emotion(request: Request, method: str = Form(...), file: Uploa
     return templates.TemplateResponse(
         request,
         "emotion.html",
-        {"emotion": emotion, "image_url": image_url, "songs": songs}
+        {"emotion": emotion, "image_url": image_url, "songs": songs, "count": count}
     )
-
+ 
 @app.post("/predict_sentiment/", response_class=HTMLResponse)
 async def predict_sentiment(request: Request, text: str = Form(...), count: int = Form(5)):
     sentiment = detect_emotion(text)
     songs = recommend_songs_by_emotion(sentiment,n=count)
-    return templates.TemplateResponse(request, "sentiment.html", {"sentiment": sentiment, "songs": songs})
+    return templates.TemplateResponse(request, "sentiment.html", {"sentiment": sentiment, "songs": songs, "count": count})
