@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Emotion Detection</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/style.css?v=2">
 </head>
 <body class="light-bg">
     <div class="widget-box">
@@ -13,23 +13,17 @@
     <h2>📸 Emotion Detection</h2>
 
     <form action="/predict_emotion/" method="post" enctype="multipart/form-data">
-        <input type="hidden" name="method" value="upload">
         <input type="file" name="file" accept="image/*" required>
-        <button type="submit">Upload Image</button>
-    </form>
-
-    <form action="/predict_emotion/" method="post">
-        <input type="hidden" name="method" value="webcam">
-        <button type="submit">Use Webcam (60 frames)</button>
+        <button type="submit" name="method" value="upload">Upload Image</button>
+        <br>
+        <button type="submit" name="method" value="webcam" formnovalidate>Use Webcam (60 frames)</button>
         <br>
         <label for="count">Number of songs:</label>
         <select name="count" id="count">
-            <option value="3">3</option>
-            <option value="5" selected>5</option>
-            <option value="10">10</option>
-            <option value="20">20</option>
+            {% for n in [3, 5, 10, 20] %}
+            <option value="{{ n }}" {% if n == (count or 5) %}selected{% endif %}>{{ n }}</option>
+            {% endfor %}
         </select>
-        
     </form>
 
     {% if image_url %}
