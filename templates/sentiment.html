@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Sentiment Detection</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/style.css?v=2">
 </head>
 <body class="light-bg">
     <div class="widget-box">
@@ -17,10 +17,9 @@
         <br>
         <label for="count">Number of songs:</label>
         <select name="count" id="count">
-            <option value="3">3</option>
-            <option value="5" selected>5</option>
-            <option value="10">10</option>
-            <option value="20">20</option>
+            {% for n in [3, 5, 10, 20] %}
+            <option value="{{ n }}" {% if n == (count or 5) %}selected{% endif %}>{{ n }}</option>
+            {% endfor %}
         </select>
         <button type="submit">Analyze Sentiment</button>
     </form>
